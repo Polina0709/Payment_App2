@@ -1,0 +1,160 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <!-- USERS -->
+    <changeSet id="1" author="flowbank">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="users"/>
+            </not>
+        </preConditions>
+        <createTable tableName="users">
+            <column name="id" type="UUID">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="full_name" type="VARCHAR(255)"/>
+            <column name="personal_number" type="VARCHAR(50)"/>
+            <column name="email" type="VARCHAR(255)"/>
+            <column name="password" type="VARCHAR(255)"/>
+            <column name="created_at" type="TIMESTAMP"/>
+        </createTable>
+
+        <addUniqueConstraint tableName="users" columnNames="personal_number" constraintName="uk_users_personal_number"/>
+        <addUniqueConstraint tableName="users" columnNames="email" constraintName="uk_users_email"/>
+    </changeSet>
+
+    <!-- ACCOUNTS -->
+    <changeSet id="2" author="flowbank">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="accounts"/>
+            </not>
+        </preConditions>
+        <createTable tableName="accounts">
+            <column name="id" type="UUID">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="user_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="account_number" type="VARCHAR(40)"/>
+            <column name="is_blocked" type="BOOLEAN"/>
+            <column name="balance" type="DECIMAL(12,2)"/>
+        </createTable>
+
+        <addUniqueConstraint tableName="accounts" columnNames="account_number" constraintName="uk_accounts_account_number"/>
+        <addForeignKeyConstraint
+                baseTableName="accounts"
+                baseColumnNames="user_id"
+                referencedTableName="users"
+                referencedColumnNames="id"
+                constraintName="fk_accounts_user"/>
+    </changeSet>
+
+    <!-- CARDS -->
+    <changeSet id="3" author="flowbank">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="cards"/>
+            </not>
+        </preConditions>
+        <createTable tableName="cards">
+            <column name="id" type="UUID">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="account_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="card_number" type="VARCHAR(16)"/>
+            <column name="expiration_date" type="DATE"/>
+            <column name="cvv" type="VARCHAR(3)"/>
+        </createTable>
+
+        <addUniqueConstraint tableName="cards" columnNames="card_number" constraintName="uk_cards_card_number"/>
+        <addForeignKeyConstraint
+                baseTableName="cards"
+                baseColumnNames="account_id"
+                referencedTableName="accounts"
+                referencedColumnNames="id"
+                constraintName="fk_cards_account"/>
+    </changeSet>
+
+    <!-- TRANSACTIONS -->
+    <changeSet id="4" author="flowbank">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="transactions"/>
+            </not>
+        </preConditions>
+        <createTable tableName="transactions">
+            <column name="id" type="UUID">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="sender_account_id" type="UUID"/>
+            <column name="receiver_account_id" type="UUID"/>
+            <column name="amount" type="DECIMAL(12,2)"/>
+            <column name="created_at" type="TIMESTAMP"/>
+        </createTable>
+
+        <addForeignKeyConstraint
+                baseTableName="transactions"
+                baseColumnNames="sender_account_id"
+                referencedTableName="accounts"
+                referencedColumnNames="id"
+                constraintName="fk_transactions_sender"/>
+
+        <addForeignKeyConstraint
+                baseTableName="transactions"
+                baseColumnNames="receiver_account_id"
+                referencedTableName="accounts"
+                referencedColumnNames="id"
+                constraintName="fk_transactions_receiver"/>
+    </changeSet>
+
+    <!-- ADMINS -->
+    <changeSet id="5" author="flowbank">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="admins"/>
+            </not>
+        </preConditions>
+        <createTable tableName="admins">
+            <column name="id" type="UUID">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="username" type="VARCHAR(255)"/>
+            <column name="password" type="VARCHAR(255)"/>
+        </createTable>
+
+        <addUniqueConstraint tableName="admins" columnNames="username" constraintName="uk_admins_username"/>
+    </changeSet>
+
+    <!-- LOGS -->
+    <changeSet id="6" author="flowbank">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="logs"/>
+            </not>
+        </preConditions>
+        <createTable tableName="logs">
+            <column name="id" type="UUID">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="user_id" type="UUID"/>
+            <column name="action" type="VARCHAR(255)"/>
+            <column name="timestamp" type="TIMESTAMP"/>
+        </createTable>
+
+        <addForeignKeyConstraint
+                baseTableName="logs"
+                baseColumnNames="user_id"
+                referencedTableName="users"
+                referencedColumnNames="id"
+                constraintName="fk_logs_user"/>
+    </changeSet>
+
+    <include file="db.changelog-demo-data.xml" relativeToChangelogFile="true"/>
+</databaseChangeLog>

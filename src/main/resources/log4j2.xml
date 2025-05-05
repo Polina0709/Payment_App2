@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN">
+    <Appenders>
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} - %c{1} - %msg%n"/>
+        </Console>
+        <File name="FileLogger" fileName="logs/flowbank.log" append="true">
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} - %c{1} - %msg%n"/>
+        </File>
+    </Appenders>
+
+    <Loggers>
+        <!-- Hibernate -->
+        <Logger name="org.hibernate.SQL" level="off"/>
+        <Logger name="org.hibernate.type.descriptor.sql" level="off"/>
+        <Logger name="org.hibernate" level="warn"/>
+
+        <!-- Spring Security, Tomcat -->
+        <Logger name="org.springframework.security" level="warn"/>
+        <Logger name="org.apache.catalina" level="warn"/>
+        <Logger name="org.apache.tomcat" level="warn"/>
+        <Logger name="org.springframework.web" level="warn"/>
+
+        <Root level="info">
+            <AppenderRef ref="Console"/>
+            <AppenderRef ref="FileLogger"/>
+        </Root>
+    </Loggers>
+</Configuration>
